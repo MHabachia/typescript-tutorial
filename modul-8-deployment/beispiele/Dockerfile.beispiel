@@ -1,0 +1,120 @@
+# =============================================================================
+# MODUL 8.5 - Multi-Stage-Build fuer eine TypeScript-Node-Anwendung
+# =============================================================================
+# Diese Datei ist eine kommentierte Referenz, kein lauffuehrbares Beispiel des
+# Kurses. Zum Ausprobieren kopierst du sie ins Projektwurzelverzeichnis:
+#
+#   cp modul-8-deployment/beispiele/Dockerfile.beispiel ./Dockerfile
+#   docker build -t typescript-tutorial:1.0.0 .
+#   docker run --rm -p 3000:3000 \
+#     -e NODE_ENV=production -e PORT=3000 \
+#     -e DATENBANK_URL=postgres://... \
+#     typescript-tutorial:1.0.0
+#
+# Die Idee in einem Satz: Die Werkstatt (Stage 1) darf dreckig sein, in den
+# Verkaufsraum (Stage 2) kommt nur das fertige Moebelstueck.
+# =============================================================================
+
+
+# -----------------------------------------------------------------------------
+# STAGE 1 - "build": hier wird kompiliert
+# -----------------------------------------------------------------------------
+# Feste Version statt "node:latest". Ein Image, das gestern noch lief und
+# heute nicht mehr, ist der teuerste Fehler im Deployment.
+FROM node:22-alpine AS build
+
+WORKDIR /app
+
+# Erst NUR die beiden Manifest-Dateien kopieren, dann installieren.
+# Grund: Docker legt fuer jede Zeile eine Schicht (Layer) an und benutzt sie
+# wieder, solange sich die kopierten Dateien nicht aendern. Aenderst du nur
+# Quellcode, bleibt die teure npm-Installation im Cache.
+COPY package.json package-lock.json ./
+
+# "npm ci" statt "npm install":
+#   - installiert exakt die Versionen aus package-lock.json (reproduzierbar)
+#   - loescht node_modules vorher (kein Altlast-Zustand)
+#   - schlaegt fehl, wenn Lockfile und package.json nicht zusammenpassen
+# Hier brauchen wir ALLE Abhaengigkeiten inkl. devDependencies -
+# ohne den TypeScript-Compiler gaebe es nichts zu bauen.
+RUN npm ci
+
+# Jetzt erst der Quellcode. Was NICHT mitkopiert wird, steht in .dockerignore.
+COPY tsconfig.json ./
+COPY modul-1-fundamente ./modul-1-fundamente
+COPY modul-2-mittelstufe ./modul-2-mittelstufe
+COPY modul-3-fortgeschritten ./modul-3-fortgeschritten
+COPY modul-4-profi-nodejs ./modul-4-profi-nodejs
+COPY modul-5-werkzeuge-workflow ./modul-5-werkzeuge-workflow
+COPY modul-6-sicherheit-auth ./modul-6-sicherheit-auth
+COPY modul-7-typescript-patterns ./modul-7-typescript-patterns
+COPY modul-8-deployment ./modul-8-deployment
+COPY modul-9-abschlussprojekt ./modul-9-abschlussprojekt
+# In einem normalen Projekt steht hier schlicht:  COPY . .
+
+# Qualitaetstor: Der Build bricht ab, wenn der Typecheck nicht sauber ist.
+# Besser ein roter Build als ein gruener Container mit kaputtem Code.
+RUN npm run typecheck
+
+# "npm run build" ist in diesem Repo genau "tsc" - liest tsconfig.json,
+# kompiliert rootDir "." nach outDir "./dist" (inkl. Source Maps).
+RUN npm run build
+
+
+# -----------------------------------------------------------------------------
+# STAGE 2 - "runtime": hier laeuft die Anwendung
+# -----------------------------------------------------------------------------
+# Diese Stage beginnt bei NULL. Alles aus Stage 1 ist weg, ausser dem, was
+# wir gleich explizit per "COPY --from=build" herueberholen. Der TypeScript-
+# Compiler, ts-node, ESLint und der komplette Quellcode bleiben draussen.
+FROM node:22-alpine AS runtime
+
+# NODE_ENV=production ist mehr als Kosmetik: viele Bibliotheken schalten
+# damit Debug-Ausgaben ab, und npm ignoriert devDependencies.
+ENV NODE_ENV=production
+
+WORKDIR /app
+
+COPY package.json package-lock.json ./
+
+# "--omit=dev" laesst devDependencies weg -> kleineres Image, weniger
+# Angriffsflaeche. Was nicht im Image ist, kann auch keine Luecke haben.
+RUN npm ci --omit=dev && npm cache clean --force
+
+# Nur das Kompilat aus Stage 1 - kein einziges .ts-File.
+# Die mitgebauten .js.map-Dateien kommen mit, damit Stacktraces in
+# Produktion auf die Original-TypeScript-Zeilen zeigen (siehe 8.4).
+COPY --from=build /app/dist ./dist
+
+# Nicht als root laufen. Das Node-Image bringt den Benutzer "node" schon mit.
+USER node
+
+# Reine Dokumentation fuer Menschen und Werkzeuge - oeffnet nichts von selbst.
+EXPOSE 3000
+
+# Der Health-Endpoint aus 8.6, hier als Container-Healthcheck.
+HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
+  CMD node -e "require('node:http').get('http://127.0.0.1:3000/health', r => process.exit(r.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))"
+
+# WICHTIG: Array-Form ("exec form"). Nur so wird node zu PID 1 und bekommt
+# SIGTERM direkt. In der Shell-Form (CMD node dist/...) haengt eine Shell
+# davor, die das Signal verschluckt - dein Graceful Shutdown liefe nie an.
+CMD ["node", "dist/modul-9-abschlussprojekt/todo-app/server.js"]
+
+
+# =============================================================================
+# Dazu gehoert immer ein .dockerignore im Projektwurzelverzeichnis:
+# =============================================================================
+#   node_modules/     <- wird im Container frisch installiert (Architektur!)
+#   dist/             <- wird im Container frisch gebaut
+#   .git/             <- riesig und im Image voellig nutzlos
+#   .idea/            <- IDE-Einstellungen gehoeren nicht ins Image
+#   .env              <- Geheimnisse NIEMALS ins Image backen
+#   *.log
+#   Dockerfile
+#   .dockerignore
+#
+# Ohne .dockerignore schickt Docker den kompletten Ordner an den Daemon -
+# mit node_modules sind das schnell mehrere hundert Megabyte Build-Kontext,
+# und ein versehentlich mitkopiertes .env landet dauerhaft im Image.
+# =============================================================================

@@ -1,0 +1,61 @@
+{
+  "compilerOptions": {
+    /* ---------- Sprachversion & Module ---------- */
+    "target": "ES2022",
+    "lib": ["ES2022"],
+    "module": "CommonJS",
+    "moduleResolution": "Node",
+    /* "moduleResolution": "Node" (= "Node10") gilt ab TypeScript 6 als
+       veraltet, funktioniert aber weiterhin und ist fuer ein einfaches
+       CommonJS-Node-Projekt ohne "type": "module" die unkomplizierteste
+       Wahl. Diese Zeile unterdrueckt nur die Deprecation-Meldung: */
+    "ignoreDeprecations": "6.0",
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    /* Jede Datei wird als eigenes Modul behandelt, auch ohne import/export.
+       Ohne diese Option teilten sich alle Beispieldateien EINEN globalen
+       Namensraum - gleich benannte Variablen in verschiedenen Kapiteln
+       wuerden dann kollidieren. */
+    "moduleDetection": "force",
+    /* Explizit setzen, damit die Node.js-Typen (console, process, Buffer,
+       require, ...) aus @types/node zuverlaessig eingebunden werden: */
+    "types": ["node"],
+
+    /* ---------- Ordner ---------- */
+    "rootDir": ".",
+    "outDir": "./dist",
+
+    /* ---------- Strict Mode: ALLES an ---------- */
+    "strict": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "strictBindCallApply": true,
+    "strictPropertyInitialization": true,
+    "noImplicitThis": true,
+    "alwaysStrict": true,
+    "useUnknownInCatchVariables": true,
+
+    /* ---------- Zusaetzliche Strenge (ueber "strict" hinaus) ---------- */
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "noImplicitOverride": true,
+    "noPropertyAccessFromIndexSignature": true,
+
+    /* ---------- Decorators (Modul 7) ---------- */
+    "experimentalDecorators": true,
+
+    /* ---------- Sonstiges ---------- */
+    "declaration": false,
+    "sourceMap": true,
+    "skipLibCheck": true,
+    "isolatedModules": true
+  },
+  "include": ["modul-*/**/*.ts"],
+  "exclude": ["node_modules", "dist"]
+}

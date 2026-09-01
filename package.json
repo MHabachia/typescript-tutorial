@@ -1,0 +1,39 @@
+{
+  "name": "typescript-tutorial",
+  "version": "1.0.0",
+  "description": "TypeScript Zero to Hero - ein 9-Module Kurs von den Grundlagen bis zur typsicheren Todo-App (optimiert fuer IntelliJ IDEA)",
+  "main": "dist/modul-9-abschlussprojekt/todo-app/server.js",
+  "scripts": {
+    "start": "ts-node modul-9-abschlussprojekt/todo-app/server.ts",
+    "modul1": "ts-node modul-1-fundamente/beispiele/01-variablen-und-typen.ts",
+    "modul2": "ts-node modul-2-mittelstufe/beispiele/01-arrays-und-tuples.ts",
+    "modul3": "ts-node modul-3-fortgeschritten/beispiele/01-union-und-intersection.ts",
+    "modul4": "ts-node modul-4-profi-nodejs/beispiele/01-module-verwenden.ts",
+    "modul5": "ts-node modul-5-werkzeuge-workflow/beispiele/01-strict-mode-in-aktion.ts",
+    "modul6": "ts-node modul-6-sicherheit-auth/beispiele/01-rollen-und-rechte.ts",
+    "modul7": "ts-node modul-7-typescript-patterns/beispiele/01-generics.ts",
+    "modul8": "ts-node modul-8-deployment/beispiele/01-konfiguration-laden.ts",
+    "modul9": "ts-node modul-9-abschlussprojekt/todo-app/server.ts",
+    "build": "tsc",
+    "start:prod": "node dist/modul-9-abschlussprojekt/todo-app/server.js",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint ."
+  },
+  "keywords": [
+    "typescript",
+    "tutorial",
+    "kurs",
+    "zero-to-hero",
+    "intellij",
+    "nodejs"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^26.4.0",
+    "eslint": "^9.0.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.0.0"
+  }
+}
