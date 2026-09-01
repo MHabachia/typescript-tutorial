@@ -158,6 +158,8 @@ npm run start:prod    # startet die kompilierte Version ohne ts-node
 typescript-tutorial/
 ├── README.md                          <- Diese Datei
 ├── GLOSSAR.md                         <- Alle Fachbegriffe des Kurses
+├── CONTRIBUTING.md                    <- Wie du zum Kurs beitragen kannst
+├── LICENSE                            <- MIT-Lizenz
 ├── package.json                       <- Abhängigkeiten & npm-Skripte
 ├── tsconfig.json                      <- Extrem strikte TypeScript-Konfiguration
 ├── eslint.config.js                   <- ESLint Flat Config
@@ -234,6 +236,11 @@ TypeScript ist dabei auf die 6.x-Reihe gepinnt: Die neue Compiler-Generation
 TypeScript 7 (Neuimplementierung in Go) ist noch nicht mit `typescript-eslint`
 kompatibel. Sprachlich ändert das für diesen Kurs nichts.
 
+## 🤝 Mitmachen
+
+Verbesserungsvorschläge, Fehlermeldungen und neue Beispiele sind willkommen –
+die Konventionen dieses Kurses stehen in [CONTRIBUTING.md](./CONTRIBUTING.md).
+
 ## 📄 Lizenz
 
-MIT
+[MIT](./LICENSE)
